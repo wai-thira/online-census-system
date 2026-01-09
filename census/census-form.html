@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Census Data Entry - NPR Kenya</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #006400;
+            padding-bottom: 10px;
+        }
+        .form-header h1 {
+            color: #006400;
+            margin-bottom: 5px;
+        }
+        .form-subtitle {
+            color: #666;
+            font-style: italic;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        legend {
+            font-weight: bold;
+            color: #006400;
+            padding: 0 10px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #006400;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        
+        .family-member {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .remove-member {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .relationship-info {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .age-warning {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .spouse-fields {
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #006400;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <form method="POST" action="submit-census.php" class="census-form" id="censusForm">
+            <div class="form-header">
+
+<div id="censusStatus" style="display: none;">
+    
+</div>
+
+<script>
+    
+function checkCensusStatus() {
+    fetch('check-census-status.php')
+        .then(response => response.json())
+        .then(data => {
+            const statusDiv = document.getElementById('censusStatus');
+            if (data.active) {
+                statusDiv.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                        <strong>✅ Census Registration Active</strong><br>
+                        Period: ${data.start_date} to ${data.end_date}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                        <strong>❌ Census Registration Closed</strong><br>
+                        ${data.message}
+                    </div>
+                `;
+                
+                document.getElementById('censusForm').style.opacity = '0.6';
+                document.querySelectorAll('#censusForm input, #censusForm select, #censusForm button').forEach(element => {
+                    element.disabled = true;
+                });
+            }
+            statusDiv.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error checking census status:', error);
+        });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkCensusStatus();
+});
+</script>
+
+
+                <h1>Family Census Form</h1>
+                <p class="form-subtitle">National Population Registry - Kenya</p>
+            </div>
+
+        
+            <fieldset class="form-section">
+                <legend>Household Information</legend>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="household_head_id">Household Head ID Number *</label>
+                        <input type="text" id="household_head_id" name="household_head_id" required 
+                               pattern="[0-9]{8}" title="8-digit ID number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="household_size">Total Household Size *</label>
+                        <input type="number" id="household_size" name="household_size" 
+                               min="1" max="20" required readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="family_identifier">Family Identifier Code</label>
+                    <input type="text" id="family_identifier" name="family_identifier" readonly>
+                    <small>Auto-generated family code for linking members</small>
+                </div>
+            </fieldset>
+
+            
+            <fieldset class="form-section">
+                <legend>Household Head Information</legend>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">Full Name *</label>
+                        
+                               <input type="text" id="full_name" name="full_name" required 
+       pattern="[A-Za-z\s\-']{2,100}" title="Enter valid name (letters, spaces, hyphens, and apostrophes only)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_number">National ID Number *</label>
+                        <input type="text" id="id_number" name="id_number" required 
+                               pattern="[0-9]{8}" title="8-digit ID number" readonly>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth *</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" required 
+                               max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">Gender *</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="marital_status">Marital Status *</label>
+                        <select id="marital_status" name="marital_status" required onchange="toggleSpouseFields()">
+                            <option value="">Select Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone_number">Phone Number</label>
+                        <input type="tel" id="phone_number" name="phone_number" 
+                               pattern="[0-9]{10}" placeholder="07XXXXXXXX">
+                    </div>
+                </div>
+
+    
+                <fieldset class="form-section">
+<legend>Spouse information</legend>
+
+
+<div id="spouseFields" class="spouse-fields" style="display: none;">
+    <h4>Spouse Information</h4>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="spouse_name">Spouse Full Name *</label>
+            <input type="text" id="spouse_name" name="spouse_name" 
+                   pattern="[A-Za-z\s\-']{2,100}" title="Enter valid full name">
+        </div>
+        
+        <div class="form-group">
+            <label for="spouse_id">Spouse ID Number *</label>
+            <input type="text" id="spouse_id" name="spouse_id" 
+                   pattern="[0-9]{8}" title="8-digit ID number">
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="spouse_education_level">Spouse Education Level</label>
+            <select id="spouse_education_level" name="spouse_education_level">
+                <option value="">Select Education Level</option>
+                <option value="Primary">Primary</option>
+                <option value="Secondary">Secondary</option>
+                <option value="Diploma">Diploma</option>
+                <option value="Degree">Degree</option>
+                <option value="Postgraduate">Postgraduate</option>
+                <option value="None">None</option>
+            </select>
+        </div>
+         <div class="form-row">
+        <div class="form-group">
+            <label for="spouse_date_of_birth">Spouse Date of Birth *</label>
+            <input type="date" id="spouse_date_of_birth" name="spouse_date_of_birth" 
+                   max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
+        </div>
+        
+        <div class="form-group">
+            <label for="spouse_occupation">Spouse Occupation</label>
+            <input type="text" id="spouse_occupation" name="spouse_occupation" 
+                   placeholder="e.g., Teacher, Farmer, Business">
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label for="spouse_monthly_income">Spouse Monthly Income Range</label>
+            <select id="spouse_monthly_income" name="spouse_monthly_income">
+                <option value="">Select Income Range</option>
+                <option value="Under 10000">Under Ksh 10,000</option>
+                <option value="10000-25000">Ksh 10,000 - 25,000</option>
+                <option value="25001-50000">Ksh 25,001 - 50,000</option>
+                <option value="50001-100000">Ksh 50,001 - 100,000</option>
+                <option value="100001-200000">Ksh 100,001 - 200,000</option>
+                <option value="200001-500000">Ksh 200,001 - 500,000</option>
+                <option value="Over 500000">Over Ksh 500,000</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+
+                
+            </fieldset>
+
+            <fieldset class="form-section">
+                <legend>Location Information</legend>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="county">County *</label>
+                        <select id="county" name="county" required onchange="updateSubCounties()">
+                            <option value="">Select County</option>
+                            
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sub_county">Sub-County *</label>
+                        <select id="sub_county" name="sub_county" required onchange="updateWards()">
+                            <option value="">Select Sub-County</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ward">Ward *</label>
+                        <select id="ward" name="ward" required>
+                            <option value="">Select Ward</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="education_level">Education Level</label>
+                        <select id="education_level" name="education_level">
+                            <option value="">Select Education Level</option>
+                            <option value="Primary">Primary</option>
+                            <option value="Secondary">Secondary</option>
+                            <option value="Diploma">Diploma</option>
+                            <option value="Degree">Degree</option>
+                            <option value="Postgraduate">Postgraduate</option>
+                            <option value="None">None</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="occupation">Occupation</label>
+                        <input type="text" id="occupation" name="occupation" 
+                               placeholder="e.g., Teacher, Farmer, Business">
+                    </div>
+                </div>
+
+                <div class="form-row">
+    <div class="form-group">
+        <label for="monthly_income">Monthly Income Range</label>
+        <select id="monthly_income" name="monthly_income">
+            <option value="">Select Income Range</option>
+            <option value="Under 10000">Under Ksh 10,000</option>
+            <option value="10000-25000">Ksh 10,000 - 25,000</option>
+            <option value="25001-50000">Ksh 25,001 - 50,000</option>
+            <option value="50001-100000">Ksh 50,001 - 100,000</option>
+            <option value="100001-200000">Ksh 100,001 - 200,000</option>
+            <option value="200001-500000">Ksh 200,001 - 500,000</option>
+            <option value="Over 500000">Over Ksh 500,000</option>
+        </select>
+    </div>
+</div>
+
+            </fieldset>
+
+
+
+            <fieldset class="form-section">
+                <legend>Family Members (Children/Dependents)</legend>
+                <div class="relationship-info">
+                    <strong>Note:</strong> Add children and other dependents living in this household. Children under 18 will be linked to this household.
+                </div>
+                
+                <div id="familyMembersContainer">
+                    
+                </div>
+                
+                <button type="button" class="btn btn-success" onclick="addFamilyMember()">
+                    + Add Family Member
+                </button>
+            </fieldset>
+
+
+            <fieldset class="form-section">
+                <legend>Registration Assistance</legend>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="assisted_registration" id="assisted_registration" 
+                               onchange="toggleHelperInfo()">
+                        <span style="font-weight: bold; color: #006400;">
+                            ✓ I am assisting someone else with registration
+                        </span>
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Check this if you're helping someone who needs assistance (elderly, disabled, etc.)
+                    </small>
+                </div>
+
+                <div id="helper_info" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="helper_phone">Your Phone Number (Optional)</label>
+                            <input type="tel" id="helper_phone" name="helper_phone" 
+                                   pattern="[0-9]{10}" placeholder="07XXXXXXXX">
+                            <small>For verification purposes only</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="helper_location">Where are you assisting from?</label>
+                            <select id="helper_location" name="helper_location">
+                                <option value="">Select Location</option>
+                                <option value="cyber_cafe">Cyber Cafe</option>
+                                <option value="community_center">Community Center</option>
+                                <option value="school">School</option>
+                                <option value="chief_camp">Chief's Camp</option>
+                                <option value="mobile_station">Mobile Registration Station</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="relationship-info" style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <h4 style="color: #006400; margin-top: 0;">🌍 Need Help with Registration?</h4>
+                    <p><strong>For rural and technologically disadvantaged citizens:</strong></p>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Visit your nearest <strong>cyber cafe</strong> with trained supervisors</li>
+                        <li>Go to <strong>community centers, schools, or chief's camps</strong></li>
+                        <li>Look for <strong>mobile registration stations</strong> in your area</li>
+                        <li>Listen for announcements on <strong>local radio stations</strong></li>
+                    </ul>
+                    <p style="margin: 0; font-style: italic;">
+                        Free assistance available for elderly, disabled, and those without internet access
+                    </p>
+                </div>
+            </fieldset>
+
+
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit Household Census Data</button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+                <a href="logout.php" class="btn btn-primary">Logout</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        
+        const countyData = {
+            "Nairobi": {
+                subCounties: {
+                    "Westlands": ["Kangemi", "Mountain View", "Parklands", "Karura"],
+                    "Dagoretti North": ["Kilimani", "Kawangware", "Gatina", "Kileleshwa"],
+                    "Dagoretti South": ["Mutuini", "Ngando", "Riruta", "Uthiru"],
+                    "Langata": ["Karen", "Nairobi West", "Mugumoini", "South C"],
+                    "Kibra": ["Laini Saba", "Lindi", "Makina", "Woodley"],
+                    "Roysambu": ["Githurai", "Kahawa West", "Zimmerman", "Roysambu"],
+                    "Kasarani": ["Clay City", "Mwiki", "Kasarani", "Njiru"],
+                    "Ruaraka": ["Babadogo", "Utalii", "Mathare North", "Lucky Summer"],
+                    "Embakasi South": ["Imara Daima", "Kwa Njenga", "Kwa Reuben", "Pipeline"],
+                    "Embakasi North": ["Kariobangi North", "Dandora Area I", "Dandora Area II"],
+                    "Embakasi Central": ["Kayole North", "Kayole Central", "Komarock"],
+                    "Embakasi East": ["Upper Savanna", "Lower Savanna", "Embakasi"],
+                    "Embakasi West": ["Umoja I", "Umoja II", "Mowlem"],
+                    "Makadara": ["Maringo", "Hamza", "Viwandani"],
+                    "Kamukunji": ["Pumwani", "Eastleigh North", "Eastleigh South"],
+                    "Starehe": ["Nairobi Central", "Ngara", "Pangani", "Landimawe"]
+                }
+            },
+            "Mombasa": {
+                subCounties: {
+                    "Mvita": ["Tudor", "Tononoka", "Shimanzi", "Majengo"],
+                    "Jomvu": ["Miritini", "Mikindani", "Jomvu Kuu"],
+                    "Changamwe": ["Port Reitz", "Kipevu", "Airport", "Chaani"],
+                    "Kisauni": ["Mtongwe", "Shika Adabu", "Bofu", "Likoni"],
+                    "Likoni": ["Timbwani", "Bofu", "Likoni", "Mtongwe"],
+                    "Nyali": ["Kongowea", "Kadzandani", "Mkomani", "Mamba"]
+                }
+            },
+            "Kisumu": {
+                subCounties: {
+                    "Kisumu Central": ["Kajulu", "Kolwa Central", "Manyatta", "Nyalenda"],
+                    "Kisumu East": ["Kajulu", "Kolwa East", "Manyatta B"],
+                    "Kisumu West": ["Central Seme", "North Seme", "East Seme", "West Seme"],
+                    "Seme": ["East Seme", "West Seme", "Central Seme", "North Seme"],
+                    "Nyando": ["Awasi", "Ogoro", "Ombeyi", "Miwani"],
+                    "Muhoroni": ["Muhoroni", "Ombeyi", "Masogo", "Chemelil"],
+                    "Nyakach": ["Pap Onditi", "Ong'ayo", "Sondu", "West Nyakach"]
+                }
+            },
+            "Nakuru": {
+                subCounties: {
+                    "Nakuru Town East": ["Biashara", "Kivumbini", "Flamingo", "Menengai"],
+                    "Nakuru Town West": ["Barut", "London", "Kaptembwo", "Kapkures"],
+                    "Naivasha": ["Naivasha East", "Naivasha West", "Maai Mahiu", "Biashara"],
+                    "Gilgil": ["Gilgil", "Elementaita", "Mbaruk", "Malewa West"],
+                    "Njoro": ["Njoro", "Mauche", "Lare", "Mau Narok"],
+                    "Molo": ["Molo", "Elburgon", "Turi", "Mariashoni"],
+                    "Rongai": ["Rongai", "Solai", "Menengai West", "Visoi"],
+                    "Bahati": ["Bahati", "Dundori", "Kabatini", "Kiamaina"],
+                    "Subukia": ["Subukia", "Waseges", "Kabazi"]
+                }
+            },
+            "Kiambu": {
+                subCounties: {
+                    "Kiambu": ["Cianda", "Karuri", "Ndenderu", "Ruiru"],
+                    "Limuru": ["Limuru Central", "Ndeiya", "Limuru East"],
+                    "Kikuyu": ["Kikuyu", "Karai", "Nachu", "Sigona"],
+                    "Gatundu North": ["Gatundu", "Gituamba", "Kiamwangi"],
+                    "Gatundu South": ["Kiganjo", "Ndarugo", "Ngenda"],
+                    "Juja": ["Juja", "Witeithie", "Kalimoni", "Theta"],
+                    "Thika": ["Township", "Kamenu", "Hospital", "Gatuanyaga"],
+                    "Ruiru": ["Ruiru", "Gitothua", "Bibirioni", "Kahawa Sukari"],
+                    "Githunguri": ["Githunguri", "Githiga", "Ikinu", "Ngewa"],
+                    "Lari": ["Lari", "Kireita", "Kijabe", "Nyanduma"]
+                }
+            },
+            "Machakos": {
+                subCounties: {
+                    "Machakos Town": ["Muvuti", "Kola", "Mumbuni", "Kalama"],
+                    "Masinga": ["Masinga", "Central", "Ekalakala", "Muthesya"],
+                    "Yatta": ["Yatta", "Kithimani", "Ikombe", "Katangi"],
+                    "Kangundo": ["Kangundo", "Matungulu", "Tala", "Kangundo West"],
+                    "Kathiani": ["Kathiani", "Mitaboni", "Kivaa", "Upper Kaewa"],
+                    "Mwala": ["Mwala", "Mbiuni", "Masii", "Muthetheni"],
+                    "Matungulu": ["Matungulu", "Tala", "Kangundo", "Ikombe"]
+                }
+            },
+            "Meru": {
+                subCounties: {
+                    "Meru Central": ["Nkuene", "Mitunguu", "Kiegoi", "Abothuguchi"],
+                    "Meru North": ["Maua", "Kangeta", "Igembe", "Antubetwe"],
+                    "Meru South": ["Chuka", "Magumoni", "Muthambi", "Mwimbi"],
+                    "Tigania West": ["Mikinduri", "Kiguchwa", "Muthara", "Thangatha"],
+                    "Tigania East": ["Miathene", "Kianjai", "Nkomo", "Mikinduri"],
+                    "Imenti North": ["Ntima", "Ntunene", "Nyaki", "Kibirichia"],
+                    "Imenti South": ["Mitunguu", "Igoji", "Abogeta", "Kianjai"]
+                }
+            },
+            "Kakamega": {
+                subCounties: {
+                    "Kakamega Central": ["Shirere", "Lubao", "Musanda", "Mahiakalo"],
+                    "Kakamega East": ["Kholera", "Shianda", "Isukha", "Idakho"],
+                    "Kakamega North": ["Matungu", "Koyonzo", "Khalaba", "Mayoni"],
+                    "Kakamega South": ["Shinyalu", "Ikolomani", "Lugari", "Chekalini"],
+                    "Lugari": ["Lugari", "Chekalini", "Mautuma", "Lumakanda"],
+                    "Likuyani": ["Likuyani", "Sango", "Kongoni", "Soy"],
+                    "Malava": ["Malava", "Kabras", "Butali", "Chegulo"]
+                }
+            },
+            "Kisii": {
+                subCounties: {
+                    "Kisii Central": ["Kisii Town", "Keumbu", "Kiogoro", "Bobaracho"],
+                    "Kisii South": ["Tabaka", "Nyatieko", "Bogiakumu", "Riana"],
+                    "Kisii East": ["Kegogi", "Marani", "Bomorenda", "Bokimonge"],
+                    "Kisii West": ["Mogonga", "Bomorenda", "Bokimonge", "Masige"],
+                    "Gucha": ["Ogembo", "Nyamarambe", "Bomachoge", "Bomariba"],
+                    "Gucha South": ["Nyamache", "Bokimonge", "Bomorenda", "Masige"],
+                    "Bobasi": ["Bobasi", "Bomachoge", "Bomariba", "Masige"]
+                }
+            },
+            "Bungoma": {
+                subCounties: {
+                    "Bungoma Central": ["Bungoma Town", "Sang'alo", "Nalondo", "Mihuu"],
+                    "Bungoma North": ["Kimilili", "Kibingei", "Kamukuywa", "Mbakalo"],
+                    "Bungoma South": ["Webuye", "Bokoli", "Misikhu", "Ndivisi"],
+                    "Bungoma East": ["Kanduyi", "Mabanga", "Misikhu", "Ndivisi"],
+                    "Bungoma West": ["Sirisia", "Kabuchai", "Chwele", "Bwake"],
+                    "Mt. Elgon": ["Kapsokwony", "Cheptais", "Chepyuk", "Kaptama"]
+                }
+            },
+            "Uasin Gishu": {
+                subCounties: {
+                    "Eldoret East": ["Kapsaret", "Kesses", "Ziwa", "Soy"],
+                    "Eldoret West": ["Kapsoya", "Kipkenyo", "Racecourse", "Langas"],
+                    "Eldoret North": ["Moiben", "Kesses", "Sergoit", "Tembelio"],
+                    "Eldoret South": ["Kapsaret", "Kipkenyo", "Racecourse", "Langas"],
+                    "Ainabkoi": ["Ainabkoi", "Kapsoya", "Kesses", "Moiben"],
+                    "Kapseret": ["Kapseret", "Kipkenyo", "Racecourse", "Langas"],
+                    "Kesses": ["Kesses", "Moiben", "Sergoit", "Tembelio"],
+                    "Moiben": ["Moiben", "Kesses", "Sergoit", "Tembelio"],
+                    "Soy": ["Soy", "Ziwa", "Kapsaret", "Kuinet"]
+                }
+            },
+            "Kilifi": {
+                subCounties: {
+                    "Kilifi North": ["Tezo", "Matsangoni", "Kijipwa", "Mtwapa"],
+                    "Kilifi South": ["Kilifi", "Mavueni", "Matsangoni", "Mtwapa"],
+                    "Kaloleni": ["Mazeras", "Mariakani", "Kayafungo", "Kaloleni"],
+                    "Rabai": ["Rabai", "Kambe", "Ribe", "Mwarakaya"],
+                    "Ganze": ["Ganze", "Bamba", "Jaribuni", "Sokoke"],
+                    "Malindi": ["Malindi", "Watamu", "Ganda", "Magarini"],
+                    "Magarini": ["Magarini", "Adu", "Gongoni", "Garashi"]
+                }
+            },
+            "Kajiado": {
+                subCounties: {
+                    "Kajiado Central": ["Oloosirkon", "Nkaimurunya", "Olkeri", "Ongata Rongai"],
+                    "Kajiado North": ["Kitengela", "Oloosirkon", "Nkaimurunya", "Olkeri"],
+                    "Kajiado East": ["Kenya", "Imaroro", "Keekonyokie", "Iloodokilani"],
+                    "Kajiado West": ["Magu", "Mashuuru", "Ewaso Kedong", "Entonet"],
+                    "Kajiado South": ["Rombo", "Kimana", "Kuku", "Oloitokitok"]
+                }
+            },
+            "Nyeri": {
+                subCounties: {
+                    "Nyeri Central": ["Nyeri Town", "Kiganjo", "Endarasha", "Mweiga"],
+                    "Nyeri South": ["Othaya", "Iriaini", "Chinga", "Mahiga"],
+                    "Nyeri North": ["Karatina", "Gatitu", "Ruguru", "Iriaini"],
+                    "Tetu": ["Tetu", "Iriaini", "Chinga", "Mahiga"],
+                    "Kieni": ["Kieni", "Endarasha", "Mweiga", "Naromoru"],
+                    "Mathira": ["Mathira", "Karatina", "Gatitu", "Ruguru"],
+                    "Mukurweini": ["Mukurweini", "Iriaini", "Chinga", "Mahiga"]
+                }
+            },
+            "Kericho": {
+                subCounties: {
+                    "Kericho Central": ["Kericho", "Kipkelion", "Londiani", "Kipchimchim"],
+                    "Kericho East": ["Litein", "Kipkelion", "Londiani", "Kipchimchim"],
+                    "Kericho West": ["Kipkelion", "Londiani", "Kipchimchim", "Chepseon"],
+                    "Bureti": ["Bureti", "Litein", "Kipkelion", "Londiani"],
+                    "Belgut": ["Belgut", "Kipkelion", "Londiani", "Kipchimchim"],
+                    "Kipkelion East": ["Kipkelion", "Londiani", "Kipchimchim", "Chepseon"],
+                    "Kipkelion West": ["Kipkelion", "Londiani", "Kipchimchim", "Chepseon"],
+                    "Soin/Sigowet": ["Sigowet", "Soin", "Kipkelion", "Londiani"]
+                }
+            },
+            "Murang'a": {
+                subCounties: {
+                    "Murang'a South": ["Kangema", "Kiharu", "Kigumo", "Kahuro"],
+                    "Murang'a East": ["Kangari", "Kigumo", "Kiharu", "Kahuro"],
+                    "Kandara": ["Kandara", "Kigumo", "Kiharu", "Kahuro"],
+                    "Gatanga": ["Gatanga", "Kigumo", "Kiharu", "Kahuro"],
+                    "Kangema": ["Kangema", "Kiharu", "Kigumo", "Kahuro"],
+                    "Kigumo": ["Kigumo", "Kiharu", "Kahuro", "Kangari"],
+                    "Kahuro": ["Kahuro", "Kiharu", "Kigumo", "Kangari"]
+                }
+            },
+            "Turkana": {
+                subCounties: {
+                    "Turkana Central": ["Lodwar", "Kanamkemer", "Kalokol", "Kakuma"],
+                    "Turkana North": ["Kakuma", "Lokichogio", "Kalokol", "Lodwar"],
+                    "Turkana South": ["Lokichar", "Katilu", "Kalapata", "Kaputir"],
+                    "Turkana East": ["Lokori", "Kapedo", "Katilia", "Kalapata"],
+                    "Turkana West": ["Kakuma", "Lokichogio", "Kalokol", "Lodwar"],
+                    "Loima": ["Loima", "Kakuma", "Lokichogio", "Kalokol"]
+                }
+            },
+            "Garissa": {
+                subCounties: {
+                    "Garissa Township": ["Garissa", "Ijara", "Hulugho", "Sankuri"],
+                    "Balambala": ["Balambala", "Sankuri", "Modogashe", "Benane"],
+                    "Lagdera": ["Modogashe", "Benane", "Sankuri", "Balambala"],
+                    "Dadaab": ["Dadaab", "Liboi", "Damajale", "Dertu"],
+                    "Fafi": ["Fafi", "Bura", "Hulugho", "Sankuri"],
+                    "Ijara": ["Ijara", "Hulugho", "Sankuri", "Masalani"]
+                }
+            },
+            "Mandera": {
+                subCounties: {
+                    "Mandera East": ["Mandera", "Takaba", "Lafey", "Rhamu"],
+                    "Mandera West": ["Takaba", "Lafey", "Rhamu", "Mandera"],
+                    "Mandera North": ["Rhamu", "Lafey", "Takaba", "Mandera"],
+                    "Banissa": ["Banissa", "Takaba", "Lafey", "Rhamu"],
+                    "Lafey": ["Lafey", "Takaba", "Rhamu", "Mandera"],
+                    "Kutulo": ["Kutulo", "Takaba", "Lafey", "Rhamu"]
+                }
+            },
+            "Marsabit": {
+                subCounties: {
+                    "Marsabit Central": ["Marsabit", "Sololo", "Moyale", "Laisamis"],
+                    "Marsabit North": ["Sololo", "Moyale", "Laisamis", "Marsabit"],
+                    "Marsabit South": ["Laisamis", "Marsabit", "Sololo", "Moyale"],
+                    "Laisamis": ["Laisamis", "Marsabit", "Sololo", "Moyale"],
+                    "Moyale": ["Moyale", "Sololo", "Marsabit", "Laisamis"],
+                    "North Horr": ["North Horr", "Marsabit", "Sololo", "Moyale"],
+                    "Saku": ["Saku", "Marsabit", "Sololo", "Moyale"]
+                }
+            },
+            "Kwale": {
+                subCounties: {
+                    "Matuga": ["Matuga", "Ukunda", "Msambweni", "Lunga Lunga"],
+                    "Msambweni": ["Msambweni", "Ukunda", "Matuga", "Lunga Lunga"],
+                    "Kinango": ["Kinango", "Matuga", "Msambweni", "Lunga Lunga"],
+                    "Lunga Lunga": ["Lunga Lunga", "Matuga", "Msambweni", "Ukunda"]
+                }
+            },
+            "Tana River": {
+                subCounties: {
+                    "Tana Delta": ["Tana Delta", "Garsen", "Kipini", "Wenje"],
+                    "Tana North": ["Kipini", "Garsen", "Tana Delta", "Wenje"],
+                    "Tana South": ["Wenje", "Garsen", "Tana Delta", "Kipini"],
+                    "Bura": ["Bura", "Garsen", "Tana Delta", "Kipini"],
+                    "Galole": ["Galole", "Garsen", "Tana Delta", "Kipini"]
+                }
+            },
+            "Lamu": {
+                subCounties: {
+                    "Lamu East": ["Faza", "Kiunga", "Mkokoni", "Basuba"],
+                    "Lamu West": ["Lamu", "Mpeketoni", "Witu", "Hindi"]
+                }
+            },
+            "Taita-Taveta": {
+                subCounties: {
+                    "Taveta": ["Taveta", "Mwatate", "Wundanyi", "Voi"],
+                    "Wundanyi": ["Wundanyi", "Mwatate", "Taveta", "Voi"],
+                    "Mwatate": ["Mwatate", "Wundanyi", "Taveta", "Voi"],
+                    "Voi": ["Voi", "Mwatate", "Wundanyi", "Taveta"]
+                }
+            },
+            "Wajir": {
+                subCounties: {
+                    "Wajir East": ["Wajir", "Buna", "Habaswein", "Tarbaj"],
+                    "Wajir West": ["Tarbaj", "Buna", "Wajir", "Habaswein"],
+                    "Wajir North": ["Buna", "Wajir", "Habaswein", "Tarbaj"],
+                    "Wajir South": ["Habaswein", "Wajir", "Buna", "Tarbaj"],
+                    "Eldas": ["Eldas", "Wajir", "Buna", "Habaswein"],
+                    "Tarbaj": ["Tarbaj", "Buna", "Wajir", "Habaswein"]
+                }
+            },
+            "Isiolo": {
+                subCounties: {
+                    "Isiolo": ["Isiolo", "Garbatulla", "Merti", "Kinna"],
+                    "Garbatulla": ["Garbatulla", "Isiolo", "Merti", "Kinna"],
+                    "Merti": ["Merti", "Isiolo", "Garbatulla", "Kinna"]
+                }
+            },
+            "Tharaka-Nithi": {
+                subCounties: {
+                    "Tharaka South": ["Tharaka", "Chiakariga", "Marimanti", "Maganjo"],
+                    "Tharaka North": ["Chiakariga", "Tharaka", "Marimanti", "Maganjo"],
+                    "Chuka": ["Chuka", "Magumoni", "Muthambi", "Karingani"],
+                    "Igambang'ombe": ["Igambang'ombe", "Chuka", "Magumoni", "Muthambi"],
+                    "Maara": ["Maara", "Chuka", "Magumoni", "Muthambi"],
+                    "Muthambi": ["Muthambi", "Chuka", "Magumoni", "Karingani"]
+                }
+            },
+            "Embu": {
+                subCounties: {
+                    "Embu East": ["Embu", "Runyenjes", "Manyatta", "Kithimu"],
+                    "Embu West": ["Embu", "Runyenjes", "Manyatta", "Kithimu"],
+                    "Embu North": ["Manyatta", "Runyenjes", "Embu", "Kithimu"],
+                    "Mbeere South": ["Mbeere", "Kiritiri", "Siakago", "Gachoka"],
+                    "Mbeere North": ["Siakago", "Kiritiri", "Mbeere", "Gachoka"]
+                }
+            },
+            "Kitui": {
+                subCounties: {
+                    "Kitui Central": ["Kitui", "Mutonguni", "Kisasi", "Kwa Mutonga"],
+                    "Kitui West": ["Mutonguni", "Kitui", "Kisasi", "Kwa Mutonga"],
+                    "Kitui East": ["Kisasi", "Kitui", "Mutonguni", "Kwa Mutonga"],
+                    "Kitui South": ["Mutomo", "Ikutha", "Athi", "Kanziko"],
+                    "Kitui Rural": ["Kwa Mutonga", "Kitui", "Mutonguni", "Kisasi"],
+                    "Mwingi Central": ["Mwingi", "Kyuso", "Migwani", "Nguni"],
+                    "Mwingi West": ["Migwani", "Mwingi", "Kyuso", "Nguni"],
+                    "Mwingi North": ["Kyuso", "Mwingi", "Migwani", "Nguni"]
+                }
+            },
+            "Makueni": {
+                subCounties: {
+                    "Makueni": ["Makueni", "Wote", "Kathonzweni", "Kilungu"],
+                    "Kibwezi West": ["Kibwezi", "Makindu", "Mtito Andei", "Kathonzweni"],
+                    "Kibwezi East": ["Makindu", "Kibwezi", "Mtito Andei", "Kathonzweni"],
+                    "Kilome": ["Kilome", "Kathonzweni", "Makueni", "Wote"],
+                    "Mbooni": ["Mbooni", "Kathonzweni", "Kilungu", "Makueni"],
+                    "Nguu": ["Nguu", "Kilome", "Kathonzweni", "Makueni"]
+                }
+            },
+            "Nyandarua": {
+                subCounties: {
+                    "Kinangop": ["Kinangop", "Engineer", "Magumu", "Murungaru"],
+                    "Kipipiri": ["Kipipiri", "Githioro", "Wanjohi", "Geta"],
+                    "Ol Kalou": ["Ol Kalou", "Kinangop", "Engineer", "Magumu"],
+                    "Ol Joro Orok": ["Ol Joro Orok", "Geta", "Wanjohi", "Githioro"],
+                    "Ndaragwa": ["Ndaragwa", "Kiriita", "Leshau", "Geta"]
+                }
+            },
+            "Kirinyaga": {
+                subCounties: {
+                    "Kirinyaga Central": ["Kerugoya", "Kutus", "Baragwi", "Mutithi"],
+                    "Kirinyaga East": ["Kianyaga", "Baragwi", "Mutithi", "Kerugoya"],
+                    "Kirinyaga West": ["Baricho", "Ndia", "Gathigiriri", "Mutithi"],
+                    "Mwea": ["Mwea", "Wanguru", "Thiba", "Murinduko"]
+                }
+            },
+            "West Pokot": {
+                subCounties: {
+                    "Kapenguria": ["Kapenguria", "Mnagei", "Siyoi", "Riwa"],
+                    "Pokot South": ["Chepareria", "Lelan", "Sekerr", "Masol"],
+                    "Pokot Central": ["Kacheliba", "Kasei", "Kodich", "Kapchok"],
+                    "Pokot North": ["Alale", "Kasei", "Kodich", "Kapchok"]
+                }
+            },
+            "Samburu": {
+                subCounties: {
+                    "Samburu East": ["Wamba", "Waso", "Archers Post", "Serolipi"],
+                    "Samburu North": ["Baragoi", "South Horr", "Ngurunit", "Elbarta"],
+                    "Samburu West": ["Maralal", "Kirisia", "Nyiro", "Angata Nanyokie"]
+                }
+            },
+            "Trans Nzoia": {
+                subCounties: {
+                    "Kwanza": ["Kwanza", "Endebess", "Saboti", "Kiminini"],
+                    "Endebess": ["Endebess", "Kwanza", "Saboti", "Kiminini"],
+                    "Saboti": ["Saboti", "Kwanza", "Endebess", "Kiminini"],
+                    "Kiminini": ["Kiminini", "Kwanza", "Endebess", "Saboti"],
+                    "Cherangany": ["Cherangany", "Kwanza", "Endebess", "Saboti"]
+                }
+            },
+            "Elgeyo-Marakwet": {
+                subCounties: {
+                    "Keiyo North": ["Iten", "Tambach", "Kapsowar", "Chesoi"],
+                    "Keiyo South": ["Kapsowar", "Tambach", "Iten", "Chesoi"],
+                    "Marakwet East": ["Chesoi", "Kapsowar", "Tambach", "Iten"],
+                    "Marakwet West": ["Chepkorio", "Kapsowar", "Tambach", "Iten"]
+                }
+            },
+            "Nandi": {
+                subCounties: {
+                    "Chesumei": ["Chesumei", "Kapsabet", "Emgwen", "Mosop"],
+                    "Emgwen": ["Emgwen", "Kapsabet", "Chesumei", "Mosop"],
+                    "Mosop": ["Mosop", "Kapsabet", "Emgwen", "Chesumei"],
+                    "Aldai": ["Aldai", "Kapsabet", "Emgwen", "Mosop"],
+                    "Tinderet": ["Tinderet", "Kapsabet", "Emgwen", "Mosop"]
+                }
+            },
+            "Baringo": {
+                subCounties: {
+                    "Baringo Central": ["Kabarnet", "Sacho", "Bartabwa", "Kabartonjo"],
+                    "Baringo North": ["Kabartonjo", "Bartabwa", "Kabarnet", "Sacho"],
+                    "Baringo South": ["Mogotio", "Mochongoi", "Emining", "Lembus"],
+                    "Eldama Ravine": ["Eldama Ravine", "Mogotio", "Mochongoi", "Emining"],
+                    "Mogotio": ["Mogotio", "Eldama Ravine", "Mochongoi", "Emining"],
+                    "Tiaty": ["Tiaty", "Bartabwa", "Kabartonjo", "Kabarnet"]
+                }
+            },
+            "Laikipia": {
+                subCounties: {
+                    "Laikipia Central": ["Nanyuki", "Rumuruti", "Ol Moran", "Segera"],
+                    "Laikipia East": ["Nanyuki", "Rumuruti", "Ol Moran", "Segera"],
+                    "Laikipia North": ["Rumuruti", "Nanyuki", "Ol Moran", "Segera"],
+                    "Laikipia West": ["Rumuruti", "Nanyuki", "Ol Moran", "Segera"],
+                    "Nyahururu": ["Nyahururu", "Rumuruti", "Nanyuki", "Ol Moran"]
+                }
+            },
+            "Narok": {
+                subCounties: {
+                    "Narok North": ["Narok", "Ololulung'a", "Majimoto", "Mara"],
+                    "Narok South": ["Narok", "Ololulung'a", "Majimoto", "Mara"],
+                    "Narok East": ["Narok", "Ololulung'a", "Majimoto", "Mara"],
+                    "Narok West": ["Narok", "Ololulung'a", "Majimoto", "Mara"],
+                    "Kilgoris": ["Kilgoris", "Narok", "Ololulung'a", "Majimoto"],
+                    "Emurua Dikirr": ["Emurua Dikirr", "Narok", "Ololulung'a", "Majimoto"]
+                }
+            },
+            "Bomet": {
+                subCounties: {
+                    "Bomet Central": ["Bomet", "Sotik", "Chepalungu", "Konoin"],
+                    "Bomet East": ["Bomet", "Sotik", "Chepalungu", "Konoin"],
+                    "Chepalungu": ["Chepalungu", "Bomet", "Sotik", "Konoin"],
+                    "Konoin": ["Konoin", "Bomet", "Sotik", "Chepalungu"],
+                    "Sotik": ["Sotik", "Bomet", "Chepalungu", "Konoin"]
+                }
+            },
+            "Vihiga": {
+                subCounties: {
+                    "Vihiga": ["Vihiga", "Mbale", "Luanda", "Emuhaya"],
+                    "Sabatia": ["Sabatia", "Vihiga", "Mbale", "Luanda"],
+                    "Hamisi": ["Hamisi", "Vihiga", "Mbale", "Luanda"],
+                    "Luanda": ["Luanda", "Vihiga", "Mbale", "Emuhaya"],
+                    "Emuhaya": ["Emuhaya", "Vihiga", "Mbale", "Luanda"]
+                }
+            },
+            "Busia": {
+                subCounties: {
+                    "Busia": ["Busia", "Funyula", "Nambale", "Butula"],
+                    "Funyula": ["Funyula", "Busia", "Nambale", "Butula"],
+                    "Nambale": ["Nambale", "Busia", "Funyula", "Butula"],
+                    "Butula": ["Butula", "Busia", "Funyula", "Nambale"],
+                    "Teso North": ["Malaba", "Busia", "Funyula", "Nambale"],
+                    "Teso South": ["Amagoro", "Busia", "Funyula", "Nambale"]
+                }
+            },
+            "Siaya": {
+                subCounties: {
+                    "Siaya": ["Siaya", "Bondo", "Ugunja", "Ugenya"],
+                    "Bondo": ["Bondo", "Siaya", "Ugunja", "Ugenya"],
+                    "Rarieda": ["Rarieda", "Siaya", "Bondo", "Ugunja"],
+                    "Ugenya": ["Ugenya", "Siaya", "Bondo", "Ugunja"],
+                    "Ugunja": ["Ugunja", "Siaya", "Bondo", "Ugenya"],
+                    "Gem": ["Gem", "Siaya", "Bondo", "Ugunja"]
+                }
+            },
+            "Homa Bay": {
+                subCounties: {
+                    "Homa Bay": ["Homa Bay", "Rachuonyo", "Ndhiwa", "Rangwe"],
+                    "Ndhiwa": ["Ndhiwa", "Homa Bay", "Rachuonyo", "Rangwe"],
+                    "Rachuonyo North": ["Rachuonyo", "Homa Bay", "Ndhiwa", "Rangwe"],
+                    "Rachuonyo South": ["Rachuonyo", "Homa Bay", "Ndhiwa", "Rangwe"],
+                    "Rangwe": ["Rangwe", "Homa Bay", "Rachuonyo", "Ndhiwa"],
+                    "Suba": ["Suba", "Homa Bay", "Rachuonyo", "Ndhiwa"]
+                }
+            },
+            "Migori": {
+                subCounties: {
+                    "Migori": ["Migori", "Rongo", "Awendo", "Suna"],
+                    "Rongo": ["Rongo", "Migori", "Awendo", "Suna"],
+                    "Awendo": ["Awendo", "Migori", "Rongo", "Suna"],
+                    "Suna East": ["Suna", "Migori", "Rongo", "Awendo"],
+                    "Suna West": ["Suna", "Migori", "Rongo", "Awendo"],
+                    "Uriri": ["Uriri", "Migori", "Rongo", "Awendo"],
+                    "Nyatike": ["Nyatike", "Migori", "Rongo", "Awendo"]
+                }
+            },
+            "Nyamira": {
+                subCounties: {
+                    "Nyamira North": ["Nyamira", "Manga", "Ekerenyo", "Rigoma"],
+                    "Nyamira South": ["Nyamira", "Manga", "Ekerenyo", "Rigoma"],
+                    "Borabu": ["Borabu", "Nyamira", "Manga", "Ekerenyo"],
+                    "Manga": ["Manga", "Nyamira", "Ekerenyo", "Rigoma"]
+                }
+            }
+        };
+
+        let familyMemberCount = 0;
+
+    
+        function initializeCounties() {
+            const countySelect = document.getElementById('county');
+            
+            countySelect.innerHTML = '<option value="">Select County</option>';
+            
+        
+            const counties = Object.keys(countyData).sort();
+            counties.forEach(county => {
+                const option = document.createElement('option');
+                option.value = county;
+                option.textContent = county;
+                countySelect.appendChild(option);
+            });
+        }
+
+        
+function toggleSpouseFields() {
+    const maritalStatus = document.getElementById('marital_status').value;
+    const spouseFields = document.getElementById('spouseFields');
+    
+    console.log('Marital status changed to:', maritalStatus); 
+    
+    if (maritalStatus === 'Married') {
+        spouseFields.style.display = 'block';
+        
+        document.getElementById('spouse_name').required = true;
+        document.getElementById('spouse_id').required = true;
+        document.getElementById('spouse_date_of_birth').required = true;
+        document.getElementById('spouse_gender').required = true;
+    } else {
+        spouseFields.style.display = 'none';
+        
+        document.getElementById('spouse_name').required = false;
+        document.getElementById('spouse_id').required = false;
+        document.getElementById('spouse_date_of_birth').required = false;
+        document.getElementById('spouse_gender').required = false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    toggleSpouseFields();
+    
+    
+    document.getElementById('marital_status').addEventListener('change', toggleSpouseFields);
+});
+        
+function checkPhoneNumberUniqueness(phoneNumber) {
+    if (!phoneNumber || phoneNumber.length < 10) return true; // Skip if empty or invalid
+    
+    return fetch('check-phone.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'phone_number=' + encodeURIComponent(phoneNumber)
+    })
+    .then(response => response.json())
+    .then(data => {
+        return data.available;
+    })
+    .catch(error => {
+        console.error('Error checking phone number:', error);
+        return true; 
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    
+    const phoneInput = document.getElementById('phone_number');
+    if (phoneInput) {
+        phoneInput.addEventListener('blur', function() {
+            const phoneNumber = this.value.trim();
+            if (phoneNumber && phoneNumber.length >= 10) {
+                checkPhoneNumberUniqueness(phoneNumber).then(isAvailable => {
+                    if (!isAvailable) {
+                        alert('This phone number is already registered. Please use a different phone number.');
+                        this.focus();
+                        this.select();
+                    }
+                });
+            }
+        });
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone_number');
+    const phoneFeedback = document.createElement('div');
+    phoneFeedback.style.fontSize = '0.9em';
+    phoneFeedback.style.marginTop = '5px';
+    phoneInput.parentNode.appendChild(phoneFeedback);
+
+    phoneInput.addEventListener('blur', function() {
+        const phoneNumber = this.value.trim();
+        phoneFeedback.textContent = '';
+        phoneFeedback.className = '';
+        
+        if (phoneNumber === '') {
+            return;
+        }
+        
+        if (!/^[0-9]{10}$/.test(phoneNumber)) {
+            phoneFeedback.textContent = 'Please enter a valid 10-digit phone number';
+            phoneFeedback.style.color = 'red';
+            return;
+        }
+        
+    
+        phoneFeedback.textContent = 'Checking availability...';
+        phoneFeedback.style.color = 'blue';
+        
+        checkPhoneNumberUniqueness(phoneNumber).then(isAvailable => {
+            if (isAvailable) {
+                phoneFeedback.textContent = '✓ Phone number available';
+                phoneFeedback.style.color = 'green';
+            } else {
+                phoneFeedback.textContent = '✗ This phone number is already registered';
+                phoneFeedback.style.color = 'red';
+                this.focus();
+                this.select();
+            }
+        });
+    });
+    
+
+    phoneInput.addEventListener('input', function() {
+        phoneFeedback.textContent = '';
+    });
+});
+
+
+
+        function generateFamilyIdentifier() {
+            const timestamp = new Date().getTime();
+            const random = Math.floor(Math.random() * 1000);
+            return `FAM${timestamp}${random}`;
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('family_identifier').value = generateFamilyIdentifier();
+            initializeCounties(); 
+            
+            const headIdInput = document.getElementById('household_head_id');
+            const primaryIdInput = document.getElementById('id_number');
+            
+            headIdInput.addEventListener('blur', function() {
+                primaryIdInput.value = this.value;
+            });
+        });
+
+    
+        function updateSubCounties() {
+            const countySelect = document.getElementById('county');
+            const subCountySelect = document.getElementById('sub_county');
+            const wardSelect = document.getElementById('ward');
+            
+            const selectedCounty = countySelect.value;
+            
+            
+            subCountySelect.innerHTML = '<option value="">Select Sub-County</option>';
+            wardSelect.innerHTML = '<option value="">Select Ward</option>';
+            
+            if (selectedCounty && countyData[selectedCounty]) {
+                const subCounties = Object.keys(countyData[selectedCounty].subCounties).sort();
+                
+                subCounties.forEach(subCounty => {
+                    const option = document.createElement('option');
+                    option.value = subCounty;
+                    option.textContent = subCounty;
+                    subCountySelect.appendChild(option);
+                });
+            }
+        }
+
+        
+        function updateWards() {
+            const countySelect = document.getElementById('county');
+            const subCountySelect = document.getElementById('sub_county');
+            const wardSelect = document.getElementById('ward');
+            
+            const selectedCounty = countySelect.value;
+            const selectedSubCounty = subCountySelect.value;
+            
+            
+            wardSelect.innerHTML = '<option value="">Select Ward</option>';
+            
+            if (selectedCounty && selectedSubCounty && countyData[selectedCounty]) {
+                const wards = countyData[selectedCounty].subCounties[selectedSubCounty];
+                
+                if (wards) {
+                    wards.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward;
+                        option.textContent = ward;
+                        wardSelect.appendChild(option);
+                    });
+                }
+            }
+        }
+
+    
+        function addFamilyMember() {
+            familyMemberCount++;
+            const container = document.getElementById('familyMembersContainer');
+            
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'family-member';
+            memberDiv.innerHTML = `
+                <div class="member-header">
+                    <h4>Family Member ${familyMemberCount}</h4>
+                    <button type="button" class="remove-member" onclick="removeFamilyMember(this)">Remove</button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="member_name_${familyMemberCount}">Full Name *</label>
+                    <input type="text" id="member_name_${familyMemberCount}" name="members[${familyMemberCount}][name]" required 
+       pattern="[A-Za-z\s\-']{2,100}" title="Enter valid name (letters, spaces, hyphens, and apostrophes only)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="member_id_${familyMemberCount}">ID Number (if 18+)</label>
+                        <input type="text" id="member_id_${familyMemberCount}" name="members[${familyMemberCount}][id_number]" 
+                               pattern="[0-9]{8}" title="8-digit ID number">
+                        <small>Leave blank for children under 18</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="member_dob_${familyMemberCount}">Date of Birth *</label>
+                        <input type="date" id="member_dob_${familyMemberCount}" name="members[${familyMemberCount}][date_of_birth]" 
+                               required onchange="validateMemberAge(this, ${familyMemberCount})">
+                        <div id="age_warning_${familyMemberCount}" class="age-warning"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="member_gender_${familyMemberCount}">Gender *</label>
+                        <select id="member_gender_${familyMemberCount}" name="members[${familyMemberCount}][gender]" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="member_relationship_${familyMemberCount}">Relationship to Head *</label>
+                        <select id="member_relationship_${familyMemberCount}" name="members[${familyMemberCount}][relationship]" required>
+                            <option value="">Select Relationship</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
+                            <option value="Adopted Child">Adopted Child</option>
+                            <option value="Foster Child">Foster Child</option>
+                            <option value="Step Child">Step Child</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="member_education_${familyMemberCount}">Education Level</label>
+                        <select id="member_education_${familyMemberCount}" name="members[${familyMemberCount}][education_level]">
+                            <option value="">Select Education Level</option>
+                            <option value="Primary">Primary</option>
+                            <option value="Secondary">Secondary</option>
+                            <option value="Diploma">Diploma</option>
+                            <option value="Degree">Degree</option>
+                            <option value="Postgraduate">Postgraduate</option>
+                            <option value="None">None</option>
+                            <option value="Pre-school">Pre-school</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(memberDiv);
+            updateHouseholdSize();
+        }
+
+        function removeFamilyMember(button) {
+            const memberDiv = button.closest('.family-member');
+            memberDiv.remove();
+            familyMemberCount--;
+            updateHouseholdSize();
+        }
+
+
+
+function toggleHelperInfo() {
+    const assistedCheckbox = document.getElementById('assisted_registration');
+    const helperInfo = document.getElementById('helper_info');
+    
+    if (assistedCheckbox.checked) {
+        helperInfo.style.display = 'block';
+    } else {
+        helperInfo.style.display = 'none';
+        
+        document.getElementById('helper_phone').value = '';
+        document.getElementById('helper_location').value = '';
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    toggleHelperInfo();
+});
+
+        function validateMemberAge(input, memberIndex) {
+            const dob = new Date(input.value);
+            const today = new Date();
+            const age = today.getFullYear() - dob.getFullYear();
+            const warningDiv = document.getElementById(`age_warning_${memberIndex}`);
+            const idInput = document.getElementById(`member_id_${memberIndex}`);
+            
+            if (age < 18) {
+                warningDiv.textContent = 'Child under 18 - will be linked to household';
+                idInput.required = false;
+                idInput.disabled = false;
+            } else {
+                warningDiv.textContent = 'Adult (18+) - ID number is required';
+                idInput.required = true;
+                idInput.disabled = false;
+            }
+        }
+
+
+        function updateHouseholdSize() {
+            let householdSize = 1; 
+            
+            const maritalStatus = document.getElementById('marital_status').value;
+            if (maritalStatus === 'Married') {
+                householdSize++;
+            }
+        
+            householdSize += familyMemberCount;
+            
+            document.getElementById('household_size').value = householdSize;
+        }
+
+        
+        document.getElementById('date_of_birth').addEventListener('change', function() {
+            const dob = new Date(this.value);
+            const today = new Date();
+            const age = today.getFullYear() - dob.getFullYear();
+            
+            if (age < 18) {
+                alert('Household head must be 18 years or older');
+                this.value = '';
+            }
+        });
+
+    
+        document.getElementById('censusForm').addEventListener('submit', function(e) {
+            
+            const maritalStatus = document.getElementById('marital_status').value;
+            const spouseName = document.getElementById('spouse_name').value;
+            const spouseId = document.getElementById('spouse_id').value;
+            
+            if (maritalStatus === 'Married' && (!spouseName || !spouseId)) {
+                alert('Please provide both spouse name and ID number for married individuals');
+                e.preventDefault();
+                return false;
+            }
+            
+            if (maritalStatus !== 'Married' && (spouseName || spouseId)) {
+                alert('Spouse information should only be provided for married individuals');
+                e.preventDefault();
+                return false;
+            }
+
+        
+            let valid = true;
+            const adultMembers = document.querySelectorAll('[id^="member_dob_"]');
+            
+            adultMembers.forEach((dobInput, index) => {
+                const dob = new Date(dobInput.value);
+                const today = new Date();
+                const age = today.getFullYear() - dob.getFullYear();
+                const memberIndex = dobInput.id.split('_')[2];
+                const idInput = document.getElementById(`member_id_${memberIndex}`);
+                
+                if (age >= 18 && (!idInput.value || idInput.value.length !== 8)) {
+                    valid = false;
+                    alert(`Family member ${memberIndex} is 18+ but missing valid ID number`);
+                    idInput.focus();
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        
+        function clearForm() {
+            if (confirm('Are you sure you want to clear all form data?')) {
+                document.getElementById('censusForm').reset();
+                document.getElementById('familyMembersContainer').innerHTML = '';
+                document.getElementById('sub_county').innerHTML = '<option value="">Select Sub-County</option>';
+                document.getElementById('ward').innerHTML = '<option value="">Select Ward</option>';
+                document.getElementById('spouseFields').style.display = 'none';
+                familyMemberCount = 0;
+                updateHouseholdSize();
+                document.getElementById('family_identifier').value = generateFamilyIdentifier();
+                initializeCounties(); 
+            }
+        }
+    </script>
+</body>
+</html>

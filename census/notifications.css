@@ -1,0 +1,314 @@
+
+.notifications-panel {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-bell {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification-count {
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    display: none;
+    z-index: 1000;
+}
+
+.notifications-panel:hover .notification-dropdown {
+    display: block;
+}
+
+.notification-item {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.3s;
+}
+
+.notification-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.notification-item.new {
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.notification-item strong {
+    color: #FFD700;
+    display: block;
+}
+
+.notification-item p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.notification-item small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.user-notifications {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: rgba(0, 255, 0, 0.1);
+    border-left-color: #00ff00;
+    color: #00ff00;
+}
+
+.alert-info {
+    background: rgba(255, 215, 0, 0.1);
+    border-left-color: #FFD700;
+    color: #FFD700;
+}
+
+.alert-warning {
+    background: rgba(255, 165, 0, 0.1);
+    border-left-color: #ffa500;
+    color: #ffa500;
+}
+
+.alert-error {
+    background: rgba(255, 0, 0, 0.1);
+    border-left-color: #ff4757;
+    color: #ff4757;
+}
+
+.helpdesk-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.helpdesk-toggle {
+    background: #FFD700;
+    color: #000;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    transition: all 0.3s;
+}
+
+.helpdesk-toggle:hover {
+    background: #FFED4E;
+    transform: translateY(-2px);
+}
+
+.helpdesk-panel {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 350px;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    display: none;
+}
+
+.helpdesk-panel.active {
+    display: block;
+}
+
+.helpdesk-header {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.helpdesk-header h3 {
+    margin: 0;
+    color: #FFD700;
+}
+
+.close-helpdesk {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.helpdesk-content {
+    padding: 15px;
+}
+
+.tab-buttons {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: #FFD700;
+    border-bottom-color: #FFD700;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+
+.faq-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.category-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.category-btn.active {
+    background: #FFD700;
+    color: #000;
+}
+
+.faq-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.faq-question {
+    font-weight: bold;
+    color: #FFD700;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.faq-answer {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+#support-form input,
+#support-form textarea,
+#support-form select {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    color: white;
+}
+
+#support-form textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+
+@media (max-width: 768px) {
+    .helpdesk-panel {
+        width: 300px;
+        right: -50px;
+    }
+    
+    .notification-dropdown {
+        width: 250px;
+    }
+}
+
+.loading-text {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 20px;
+}
+
+.error-text {
+    color: #ff6b6b;
+    text-align: center;
+    padding: 20px;
+}
+
+.no-faqs {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 20px;
+}
+
+.form-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.form-message.success {
+    background: rgba(0, 255, 0, 0.1);
+    color: #00ff00;
+    border: 1px solid rgba(0, 255, 0, 0.3);
+}
+
+.form-message.error {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.success-message small {
+    color: rgba(0, 255, 0, 0.7);
+    font-size: 0.8rem;
+}
